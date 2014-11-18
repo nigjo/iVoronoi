@@ -1123,6 +1123,8 @@ voronoilib.tools.polygon = { }
 
 function voronoilib.tools.polygon:new(inpoints,inindex)
 
+    if #inpoints < 3 then return nil end
+
     local returner = { points = inpoints, index = inindex }
 
     -- creates the edges
