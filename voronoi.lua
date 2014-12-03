@@ -5,10 +5,10 @@ in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
- 
+
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -16,9 +16,9 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
- 
+
 Based of the work David Ng (2010) and of Steve J. Fortune (1987) A Sweepline Algorithm for Voronoi Diagrams,
-Algorithmica 2, 153-174, and its translation to C++ by Matt Brubeck, 
+Algorithmica 2, 153-174, and its translation to C++ by Matt Brubeck,
 http://www.cs.hmc.edu/~mbrubeck/voronoi.html
 
 ]]--
@@ -35,9 +35,9 @@ voronoilib = { }
 -- polygoncount = the number of polygons wanted, this can be thought of as the total number of grid regions
 -- iterations = how many times you would like to run the  voronoi. the more iterations, the smoother and more regular
 --              the grid looks, recommend at least 3 iterations for a nice grid. any more is diminishing returns
--- minx,miny,maxx,maxy = the boundary for the voronoi diagram. if you choose 0,0,100,100 the function will make a voronoi diagram inside 
+-- minx,miny,maxx,maxy = the boundary for the voronoi diagram. if you choose 0,0,100,100 the function will make a voronoi diagram inside
 --                       the square defined by 0,0 and 100,100 where all the points of the voronoi are inside the square.
-function voronoilib:new(polygoncount,iterations,minx,miny,maxx,maxy) 
+function voronoilib:new(polygoncount,iterations,minx,miny,maxx,maxy)
 
 	local rvoronoi = { }
 	----------------------------------------------------------
@@ -59,12 +59,12 @@ function voronoilib:new(polygoncount,iterations,minx,miny,maxx,maxy)
 
 		---------------------------------------------------------
 		-- creates the random points that the polygons will be based
-		-- off of. if this is it > 1 then it uses the centroids of the 
+		-- off of. if this is it > 1 then it uses the centroids of the
 		-- polygons from the previous iteration as the 'random points'
 		-- this relaxes the voronoi diagram and softens the grids so
 		-- the grid is more even.
-		if it == 1 then 
-			-- creates a random point and then checks to see if that point is already inside the set of random points. 
+		if it == 1 then
+			-- creates a random point and then checks to see if that point is already inside the set of random points.
 			-- don't know what would happened but it would not return the same amount of polygons that user requested
 			for i=1,polygoncount do
 				local rx,ry = self.tools:randompoint(rvoronoi[it].boundary)
@@ -77,22 +77,22 @@ function voronoilib:new(polygoncount,iterations,minx,miny,maxx,maxy)
 		else
 			rvoronoi[it].points = rvoronoi[it-1].centroids
 		end
-		
+
 		-- sets up the rvoronoi events
 		for i = 1,#rvoronoi[it].points do
 			rvoronoi[it].events:push(rvoronoi[it].points[i], rvoronoi[it].points[i].x,{i} )
 		end
-		
+
 		while not rvoronoi[it].events:isEmpty() do
 			local e, x = rvoronoi[it].events:pop()
 			if e.event then
 				self.tools:processEvent(e,rvoronoi[it])
 			else
 				self.tools:processPoint(e,rvoronoi[it])
-			end    
+			end
 		end
-		
-		self.tools:finishEdges(rvoronoi[it])	 
+
+		self.tools:finishEdges(rvoronoi[it])
 
 		self.tools:dirty_poly(rvoronoi[it])
 
@@ -106,8 +106,8 @@ function voronoilib:new(polygoncount,iterations,minx,miny,maxx,maxy)
     -----------------------------
     -- returns the last iteration
     local returner = rvoronoi[iterations]
-	setmetatable(returner, self) 
-	self.__index = self 
+	setmetatable(returner, self)
+	self.__index = self
     return returner
 end
 
@@ -119,8 +119,8 @@ function voronoilib:getNeighbors(...)
     local indexes = { }
 
     -- builds a table of it input polygons
-    for i=2,#arg do 
-        indexes[arg[i]] = true 
+    for i=2,#arg do
+        indexes[arg[i]] = true
     end
 
     if arg[1] == 'all' then
@@ -171,22 +171,22 @@ function voronoilib:getNeighbors(...)
 end
 
 -------------------------------------------------------
--- returns the edges of a polygon. if multiple polygons are 
--- inputed then only the edges that are shared with at least 
+-- returns the edges of a polygon. if multiple polygons are
+-- inputed then only the edges that are shared with at least
 -- two polygons are returned
--- the first argument is MODE = { 'segment' or 'vertex'} 
+-- the first argument is MODE = { 'segment' or 'vertex'}
 -- segment --> returns edges where the line segment is shared with atleast 2 polygons
 -- vertex --> returns segments in which the vertexes are shared with atleast 3 polygons
 function voronoilib:getEdges(...)
 
     local returner = { }
-    local mode = arg[1] 
+    local mode = arg[1]
 
     for i=2, #arg do
         for j,line in pairs(self.polygons[arg[i]].edges) do returner[#returner+1] = line end
     end
 
-    
+
 
     if #arg > 2 then
         local processedreturner = { }
@@ -199,7 +199,7 @@ function voronoilib:getEdges(...)
                         processedreturner[#processedreturner+1] = returner[i]
                         incount[i],incount[j] = true,true
                     end
-                end 
+                end
             end
         end
         returner = processedreturner
@@ -216,11 +216,11 @@ function voronoilib:getEdges(...)
                 local point2 = 0
 
                 for indexsub,linesub in pairs(returner) do
-                    if ((math.abs(linemain[1] - linesub[1]) < voronoilib.constants.zero) and (math.abs(linemain[2] - linesub[2]) < voronoilib.constants.zero)) 
+                    if ((math.abs(linemain[1] - linesub[1]) < voronoilib.constants.zero) and (math.abs(linemain[2] - linesub[2]) < voronoilib.constants.zero))
                     or ((math.abs(linemain[1] - linesub[3]) < voronoilib.constants.zero) and (math.abs(linemain[2] - linesub[4]) < voronoilib.constants.zero)) then
                         point1 = point1 + 1
-                    elseif ((math.abs(linemain[3] - linesub[1]) < voronoilib.constants.zero) and (math.abs(linemain[4] - linesub[2]) < voronoilib.constants.zero)) 
-                    or ((math.abs(linemain[3] - linesub[3]) < voronoilib.constants.zero) and (math.abs(linemain[4] - linesub[4]) < voronoilib.constants.zero)) then 
+                    elseif ((math.abs(linemain[3] - linesub[1]) < voronoilib.constants.zero) and (math.abs(linemain[4] - linesub[2]) < voronoilib.constants.zero))
+                    or ((math.abs(linemain[3] - linesub[3]) < voronoilib.constants.zero) and (math.abs(linemain[4] - linesub[4]) < voronoilib.constants.zero)) then
                         point2 = point2 + 1
                     end
                 end
@@ -250,7 +250,7 @@ function voronoilib:polygoncontains(x,y)
     table.sort(distance,function(a,b) return a.d < b.d end)
 
     for i,pindex in pairs({ unpack(self.polygonmap[distance[1].i]),distance[1].i }) do
-        if self.polygons[pindex]:containspoint(x,y) then 
+        if self.polygons[pindex]:containspoint(x,y) then
             return self.polygons[pindex]
         end
     end
@@ -263,13 +263,13 @@ end
 -------------------------------------------------------------------------------------------------------------------------------------------------------
 voronoilib.heap = { }
 
-function voronoilib.heap:new() 
-    local o = { heap = { }, nodes = { } } 
-    setmetatable(o, self) 
-    self.__index = self 
+function voronoilib.heap:new()
+    local o = { heap = { }, nodes = { } }
+    setmetatable(o, self)
+    self.__index = self
     return o
 end
- 
+
 function voronoilib.heap:push(k, v)
     assert(v ~= nil, "cannot push nil")
 
@@ -289,7 +289,7 @@ function voronoilib.heap:push(k, v)
     return k
 
 end
- 
+
 function voronoilib.heap:pop()
     local heap_pos = #self.heap
 
@@ -321,9 +321,9 @@ function voronoilib.heap:pop()
 end
     return heap_root, heap_root_pos
 end
- 
-function voronoilib.heap:isEmpty() 
-    return self.heap[1] == nil 
+
+function voronoilib.heap:isEmpty()
+    return self.heap[1] == nil
 end
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -334,12 +334,12 @@ voronoilib.doublelinkedlist = { }
 function voronoilib.doublelinkedlist:new()
     local o = { first = nil, last = nil } -- empty list head
 
-    setmetatable(o, self) 
-    self.__index = self 
+    setmetatable(o, self)
+    self.__index = self
 
     return o
 end
- 
+
 function voronoilib.doublelinkedlist:insertAfter(node, data)
     local new = {prev = node, next = node.next, x = data.x, y = data.y} -- creates a new node
     node.next = new -- the node after node is the new node
@@ -347,11 +347,11 @@ function voronoilib.doublelinkedlist:insertAfter(node, data)
         self.last = new -- ...and set the new node as last node
     else
         --otherwise set the next nodes previous node to the new one
-        new.next.prev = new 
+        new.next.prev = new
     end
     return new -- return the new node
 end
- 
+
 function voronoilib.doublelinkedlist:insertAtStart(data)
     local new = {prev = nil, next = self.first, x = data.x, y = data.y} -- create the new node
     if not self.first then -- check if the list is empty
@@ -364,7 +364,7 @@ function voronoilib.doublelinkedlist:insertAtStart(data)
    end
    return new
 end
- 
+
 function voronoilib.doublelinkedlist:delete(node)
     if node == self.first then -- check if the node is the first one...
         -- ...and set the new first node if we remove the first
@@ -373,7 +373,7 @@ function voronoilib.doublelinkedlist:delete(node)
         -- set the previous node's next node to the next node
         node.prev.next = node.next
     end
-    
+
     if node == self.last then -- check if the node is the last one...
         -- ...the new last node is the node before the deleted node
         self.last = node.prev
@@ -381,7 +381,7 @@ function voronoilib.doublelinkedlist:delete(node)
         node.next.prev = node.prev -- update the next node's prev field
     end
 end
- 
+
 function voronoilib.doublelinkedlist:nextNode(node)
     return (not node and self.first) or node.next
 end
@@ -397,44 +397,44 @@ function voronoilib.tools:processEvent(event,ivoronoi)
         local segment = {startPoint = {x = event.x, y = event.y}, endPoint = {x = 0, y = 0}, done = false, type = 1}
         table.insert(ivoronoi.segments, segment)
         --Remove the associated arc from the front, and update segment info
-        
+
         ivoronoi.beachline:delete(event.arc)
-        
+
         if event.arc.prev then
             event.arc.prev.seg1 = segment
         end
-        
+
         if event.arc.next then
             event.arc.next.seg0 = segment
         end
-        
+
         --Finish the edges before and after arc.
         if event.arc.seg0 then
             event.arc.seg0.endPoint = {x = event.x, y = event.y}
             event.arc.seg0.done = true
-        end    
-            
+        end
+
         if event.arc.seg1 then
             event.arc.seg1.endPoint = {x = event.x, y = event.y}
             event.arc.seg1.done = true
-        end    
-        
+        end
+
         -- debugging vertix list!!!
         table.insert(ivoronoi.vertex, {x = event.x, y = event.y})
-        
+
         --Recheck circle events on either side of p:
         if (event.arc.prev) then
             self:check_circle_event(event.arc.prev, event.x,ivoronoi)
         end
         if (event.arc.next) then
             self:check_circle_event(event.arc.next, event.x,ivoronoi)
-        end    
+        end
         event.arc = nil
    end
-   event = nil 
+   event = nil
 end
- 
- 
+
+
 function voronoilib.tools:processPoint(point,ivoronoi)
     --Adds a point to the beachline
     --local intersect = self:intersect
@@ -442,86 +442,86 @@ function voronoilib.tools:processPoint(point,ivoronoi)
         ivoronoi.beachline:insertAtStart(point)
         return
     end
-    
+
     --Find the current arc(s) at height p.y (if there are any).
-    for arc in ivoronoi.beachline.nextNode, ivoronoi.beachline do 
-    	
+    for arc in ivoronoi.beachline.nextNode, ivoronoi.beachline do
+
         local z = (self:intersect(point,arc))
         if z then
             --New parabola intersects arc i.  If necessary, duplicate i.
             -- ie if there is a next node, but there is not interation, then creat a duplicate
             if not (arc.next and (self:intersect(point,arc.next))) then
                 ivoronoi.beachline:insertAfter(arc, arc)
-            else    
+            else
                 --print("test", arc.next,intersect(point,arc.next).x,intersect(point,arc.next).y, z.x,z.y  )
                 return
-            end    
+            end
             arc.next.seg1 = arc.seg1
-            
+
             --Add p between i and i->next.
             ivoronoi.beachline:insertAfter(arc, point)
- 
-            
+
+
             local segment = {startPoint = {x = z.x, y = z.y}, endPoint = {x = 0, y = 0}, done = false, type = 2}
             local segment2 = {startPoint = {x = z.x, y = z.y}, endPoint = {x = 0, y = 0}, done = false, type = 2}
- 
+
             -- debugging segment list!!!
             table.insert(ivoronoi.segments, segment)
             table.insert(ivoronoi.segments, segment2)
- 
-            
+
+
             --Add new half-edges connected to i's endpoints.
             arc.next.seg0 = segment
             arc.seg1 = segment
             arc.next.seg1 = segment2
             arc.next.next.seg0 = segment2
-            
+
             --Check for new circle events around the new arc:
             self:check_circle_event(arc, point.x, ivoronoi)
             self:check_circle_event(arc.next, point.x, ivoronoi)
             self:check_circle_event(arc.next.next, point.x, ivoronoi)
- 
+
             return
-            
-        end    
+
+        end
     end
- 
- 
+
+
     --Special case: If p never intersects an arc, append it to the list.
     -- Find the last node.
-    
+
     ivoronoi.beachline:insertAtStart(point)
- 
+
     segment = {startPoint = {x = ivoronoi.boundary[1], y = (ivoronoi.beachline.last.y + ivoronoi.beachline.last.prev.y) / 2}, endPoint = {x = 0, y = 0}, done = false, type = 3}
     table.insert(ivoronoi.segments, segment)
-    
+
     ivoronoi.beachline.last.seg0 = segment
     ivoronoi.beachline.last.prev.seg1 = segment
 end
- 
- 
- 
+
+
+
 function voronoilib.tools:check_circle_event(arc, x0, ivoronoi)
     --Look for a new circle event for arc i.
     --Invalidate any old event.
- 
+
     if (arc.event and arc.event.x ~= x0) then
         arc.event.valid = false
     end
     arc.event = nil
- 
+
     if ( not arc.prev or not arc.next) then
         return
     end
-    
+
     local a = arc.prev
     local b = arc
     local c = arc.next
- 
+
     if ((b.x-a.x)*(c.y-a.y) - (c.x-a.x)*(b.y-a.y) >= 0) then
         return false
-    end    
- 
+    end
+
     --Algorithm from O'Rourke 2ed p. 189.
     local A = b.x - a.x
     local B = b.y - a.y
@@ -530,44 +530,44 @@ function voronoilib.tools:check_circle_event(arc, x0, ivoronoi)
     local E = A*(a.x+b.x) + B*(a.y+b.y)
     local F = C*(a.x+c.x) + D*(a.y+c.y)
     local G = 2*(A*(c.y-b.y) - B*(c.x-b.x))
- 
+
     if (G == 0) then
         --return false --Points are co-linear
         print("g is 0")
     end
- 
+
     --Point o is the center of the circle.
     local o = {}
     o.x = (D*E-B*F)/G
     o.y = (A*F-C*E)/G
- 
+
     --o.x plus radius equals max x coordinate.
     local x = o.x + math.sqrt( math.pow(a.x - o.x, 2) + math.pow(a.y - o.y, 2) )
-    
+
     if x and x > x0 then
         --Create new event.
         arc.event = {x = o.x, y = o.y, arc = arc, valid = true, event = true }
         ivoronoi.events:push(arc.event, x)
     end
 end
- 
- 
- 
+
+
+
 function voronoilib.tools:intersect(point, arc)
     --Will a new parabola at point p intersect with arc i?
     local res = {}
-    if (arc.x == point.x) then 
-        return false 
+    if (arc.x == point.x) then
+        return false
     end
     local a, b = nil, nil
     if (arc.prev) then
         --Get the intersection of i->prev, i.
         a = self:intersection(arc.prev, arc, point.x).y
-    end    
+    end
     if (arc.next) then
         --Get the intersection of i->next, i.
         b = self:intersection(arc, arc.next, point.x).y
-    end    
+    end
     --print("intersect", a,b,p.y)
     if (( not arc.prev or a <= point.y) and (not arc.next or point.y <= b)) then
         res.y = point.y
@@ -577,14 +577,14 @@ function voronoilib.tools:intersect(point, arc)
     end
     return false
 end
- 
- 
+
+
 function voronoilib.tools:intersection(p0, p1, l)
     -- Where do two parabolas intersect?
-    
+
     local res = {}
     local p = {x = p0.x, y = p0.y}
- 
+
     if (p0.x == p1.x) then
         res.y = (p0.y + p1.y) / 2
     elseif (p1.x == l) then
@@ -596,29 +596,29 @@ function voronoilib.tools:intersection(p0, p1, l)
       -- Use the quadratic formula.
       local z0 = 2*(p0.x - l);
       local z1 = 2*(p1.x - l);
- 
+
       local a = 1/z0 - 1/z1;
       local b = -2*(p0.y/z0 - p1.y/z1);
       local c = (p0.y*p0.y + p0.x*p0.x - l*l)/z0 - (p1.y*p1.y + p1.x*p1.x - l*l)/z1
       res.y = ( -b - math.sqrt(b*b - 4*a*c) ) / (2*a)
    end
-   
+
    -- Plug back into one of the parabola equations.
    res.x = (p.x*p.x + (p.y-res.y)*(p.y-res.y) - l*l)/(2*p.x-2*l)
    return res
 end
- 
+
 function voronoilib.tools:finishEdges(ivoronoi)
     --Advance the sweep line so no parabolas can cross the bounding box.
     local l = ivoronoi.boundary[3] + (ivoronoi.boundary[3]-ivoronoi.boundary[1]) + (ivoronoi.boundary[4]-ivoronoi.boundary[2])
- 
+
     --Extend each remaining segment to the new parabola intersections.
     for arc in ivoronoi.beachline.nextNode, ivoronoi.beachline do
         if arc.seg1 then
             local p = self:intersection(arc, arc.next, l*2)
             arc.seg1.endPoint = {x = p.x, y = p.y}
             arc.seg1.done = true
-        end    
+        end
     end
 end
 
@@ -680,9 +680,9 @@ function voronoilib.tools:sortpolydraworder(listofpoints)
 	local left = { }
 
 	for i,point in pairs(listofpoints) do
-		if point.x < midpoint[1] then 
+		if point.x < midpoint[1] then
 			left[#left+1] = point
-		else 
+		else
 			right[#right+1] = point
 		end
 	end
@@ -691,7 +691,7 @@ function voronoilib.tools:sortpolydraworder(listofpoints)
 	for j,point in pairs(left) do
 		returner[tablecount+1-j] = point
 	end
-		
+
 	for j,point in pairs(right) do
 		returner[#returner+1] = point
 	end
@@ -758,11 +758,11 @@ function voronoilib.tools:sorttable(datable,parameter,sortbyasending)
 	local startingvalueindex = 0
 	local sortedtable = { }
 
-	for i,v in pairs(datable) do 
+	for i,v in pairs(datable) do
 		count = count + 1
 
-		if (startingvalue == nil) 
-		or (sortbyasending and (startingvalue[parameter] > v[parameter])) 
+		if (startingvalue == nil)
+		or (sortbyasending and (startingvalue[parameter] > v[parameter]))
 		or (sortbyasending == false and (startingvalue[parameter] < v[parameter])) then
 			startingvalue = v
 			startingvalueindex = i
@@ -777,8 +777,8 @@ function voronoilib.tools:sorttable(datable,parameter,sortbyasending)
 		local nextvalueindex = 0
 
 		for j,v in pairs(datable) do
-			if (nextvalue == nil) 
-			or (sortbyasending and (nextvalue[parameter] > v[parameter])) 
+			if (nextvalue == nil)
+			or (sortbyasending and (nextvalue[parameter] > v[parameter]))
 			or (sortbyasending == false and (nextvalue[parameter] < v[parameter])) then
 				nextvalue = v
 				nextvalueindex = j
@@ -847,7 +847,7 @@ end
 function voronoilib.tools:intersectionpoint(line1,line2)
 
 	local slope1 = (line1[4]-line1[2])/(line1[3]-line1[1])
-	local intercept1 = line1[2] - (slope1*line1[1])	
+	local intercept1 = line1[2] - (slope1*line1[1])
 	local slope2 = (line2[4]-line2[2])/(line2[3]-line2[1])
 	local intercept2 = line2[2] - (slope2*line2[1])
 
@@ -870,7 +870,7 @@ function voronoilib.tools:intersectionpoint(line1,line2)
 	end
 
 	local onbothlines = false
-	if self:isonline(ix,iy,line1) == true and self:isonline(ix,iy,line2) == true then 
+	if self:isonline(ix,iy,line1) == true and self:isonline(ix,iy,line2) == true then
 		onbothlines = true
 	end
 
@@ -887,7 +887,7 @@ function voronoilib.tools:issegmentintersect(line1,groupoflines)
 	for index,line2 in pairs(groupoflines) do
 		local ix,iy,onbothlines = self:intersectionpoint(line1,line2)
 
-		if ((math.abs(line1[1]-ix)+math.abs(line1[2]-iy))<voronoilib.constants.zero or (math.abs(line1[3]-ix)+math.abs(line1[4]-iy))<voronoilib.constants.zero) then 
+		if ((math.abs(line1[1]-ix)+math.abs(line1[2]-iy))<voronoilib.constants.zero or (math.abs(line1[3]-ix)+math.abs(line1[4]-iy))<voronoilib.constants.zero) then
 			onbothlines = false
 		end
 
@@ -965,16 +965,16 @@ function voronoilib.tools:dirty_poly(invoronoi)
 		local removetheline = false
 
 		-- left boundary
-		if (v.startPoint.x < invoronoi.boundary[1]) or (v.endPoint.x < invoronoi.boundary[1]) then 
+		if (v.startPoint.x < invoronoi.boundary[1]) or (v.endPoint.x < invoronoi.boundary[1]) then
 			removetheline = true
 			local px,py,onlines = self:intersectionpoint(
 				{ invoronoi.boundary[1],invoronoi.boundary[2],invoronoi.boundary[1],invoronoi.boundary[4] },
 				{ v.startPoint.x, v.startPoint.y, v.endPoint.x, v.endPoint.y }
-			) 
+			)
 			isects[#isects+1] = { x=px,y=py,on=onlines }
 		end
 		-- right boundary
-		if (v.startPoint.x > invoronoi.boundary[3]) or (v.endPoint.x > invoronoi.boundary[3]) then 
+		if (v.startPoint.x > invoronoi.boundary[3]) or (v.endPoint.x > invoronoi.boundary[3]) then
 			removetheline = true
 			local px,py,onlines = self:intersectionpoint(
 				{ invoronoi.boundary[3],invoronoi.boundary[2],invoronoi.boundary[3],invoronoi.boundary[4] },
@@ -983,7 +983,7 @@ function voronoilib.tools:dirty_poly(invoronoi)
 			isects[#isects+1] = { x=px,y=py,on=onlines }
 		end
 		--top boundary
-		if (v.startPoint.y < invoronoi.boundary[2]) or (v.endPoint.y < invoronoi.boundary[2]) then 
+		if (v.startPoint.y < invoronoi.boundary[2]) or (v.endPoint.y < invoronoi.boundary[2]) then
 			removetheline = true
 			local px,py,onlines = self:intersectionpoint(
 				{ invoronoi.boundary[1],invoronoi.boundary[2],invoronoi.boundary[3],invoronoi.boundary[2] },
@@ -993,22 +993,22 @@ function voronoilib.tools:dirty_poly(invoronoi)
 			isects[#isects+1] = { x=px,y=py,on=onlines }
 		end
 		-- bottom boundary
-		if (v.startPoint.y > invoronoi.boundary[4]) or (v.endPoint.y > invoronoi.boundary[4]) then 
+		if (v.startPoint.y > invoronoi.boundary[4]) or (v.endPoint.y > invoronoi.boundary[4]) then
 			removetheline = true
 			local px,py,onlines = self:intersectionpoint(
 				{ invoronoi.boundary[1],invoronoi.boundary[4],invoronoi.boundary[3],invoronoi.boundary[4] },
 				{ v.startPoint.x, v.startPoint.y, v.endPoint.x, v.endPoint.y }
 			)
-			isects[#isects+1] = { x=px,y=py,on=onlines }	 
+			isects[#isects+1] = { x=px,y=py,on=onlines }
 		end
 
 		--if removetheline then invoronoi.segments[i] = nil end
 
 		-- checks if the point is in or on the boundary lines
-		for index,ise in pairs(isects) do 
-			if ise.on then 
-				otherpoints[#otherpoints+1] = { x = ise.x, y = ise.y }  
-			end 
+		for index,ise in pairs(isects) do
+			if ise.on then
+				otherpoints[#otherpoints+1] = { x = ise.x, y = ise.y }
+			end
 		end
 	end
 	-- merges the points from otherpoints into the processingpoints table
@@ -1043,15 +1043,15 @@ function voronoilib.tools:dirty_poly(invoronoi)
 
 			i = i + 1
 		end
-		
+
 		--------------------------------------------------------------------------------------------------
 		-- creates the relationship between polygons, which looks like a delaunay triangulation when drawn
-		
-		-- gets all the related polygons here. 
+
+		-- gets all the related polygons here.
 		i = i - 1
 		local related = { }
-		for j=1,i do 
-			related[#related+1] = distances[j].i 
+		for j=1,i do
+			related[#related+1] = distances[j].i
 		end
 
 		-- puts them in a structure, calling it polygonmap
@@ -1065,7 +1065,7 @@ function voronoilib.tools:dirty_poly(invoronoi)
 		end
 	end
 
-	for i=1,#invoronoi.points do 
+	for i=1,#invoronoi.points do
 		-- quick fix to stop crashing
 		if polygon[i] ~= nil then
             invoronoi.polygons[i] = self.polygon:new(self:sortpolydraworder(polygon[i]),i)
@@ -1077,10 +1077,10 @@ end
 -- generates randompoints
 function voronoilib.tools:randompoint(boundary)
 
-    local x = math.random(boundary[1]+1,boundary[3]-1) 
+    local x = math.random(boundary[1]+1,boundary[3]-1)
     local y = math.random(boundary[2]+1,boundary[4]-1)
 
-    return x,y 
+    return x,y
 
 end
 
@@ -1147,8 +1147,8 @@ function voronoilib.tools.polygon:new(inpoints,inindex)
     returner.edges[edgeno][4] = returner.edges[1][2]
 
     -- lua metatable stuff...
-    setmetatable(returner, self) 
-    self.__index = self 
+    setmetatable(returner, self)
+    self.__index = self
 
     return returner
 
@@ -1159,7 +1159,7 @@ end
 function voronoilib.tools.polygon:containspoint(inx,iny)
     local centroidline = { inx,iny, self.centroid.x, self.centroid.y }
 
-    -- checks the point,centroid line with the edges of the polygon. if the point intersects any of the edges and is one the edge, then the point lies outside of the polygon 
+    -- checks the point,centroid line with the edges of the polygon. if the point intersects any of the edges and is one the edge, then the point lies outside of the polygon
     for i,line2 in pairs(self.edges) do
         local x,y,onlines = voronoilib.tools:intersectionpoint(centroidline,line2)
         if onlines then return false end
