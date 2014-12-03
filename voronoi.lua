@@ -49,7 +49,7 @@ function voronoilib:new(polygoncount, iterations, minx, miny, maxx, maxy)
         points[i] = {x = rx, y = ry}
     end
     points = self.tools:sortthepoints(points)
-    return self:fromPoints(points, iterations, boundary)
+    return self:fromPoints(points, boundary, iterations)
 end
 
 --------------------------------------------------------------------------------------------------------------------
@@ -58,10 +58,11 @@ end
 -- creates a voronoi diagram from a table of points and returns a table containing the structure.
 --
 -- points = a table of points in the form {x=int, y=int} that define the voronoi region
--- iterations = how many times you would like to run the  voronoi. the more iterations, the smoother and more regular
---              the grid looks, recommend at least 3 iterations for a nice grid. any more is diminishing returns
 -- boundary = a table of the form {minx, miny, maxx, maxy} describing the min and max x and y values from the points table
-function voronoilib:fromPoints(points, iterations, boundary)
+-- iterations = defaults to 1. If iterations > 1 then it will use the previous iteration's centroids as new points to smooth
+--              to smooth out the grid.
+function voronoilib:fromPoints(points, boundary, iterations)
+    local iterations = iterations or 1
 	local rvoronoi = {}
 	----------------------------------------------------------
 	-- the iteration loop
