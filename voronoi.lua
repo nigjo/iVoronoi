@@ -27,6 +27,7 @@ http://www.cs.hmc.edu/~mbrubeck/voronoi.html
 -------------------------------------------------------------------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------------------------------------------------------------------
 voronoilib = { }
+
 --------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------
@@ -37,9 +38,31 @@ voronoilib = { }
 --              the grid looks, recommend at least 3 iterations for a nice grid. any more is diminishing returns
 -- minx,miny,maxx,maxy = the boundary for the voronoi diagram. if you choose 0,0,100,100 the function will make a voronoi diagram inside
 --                       the square defined by 0,0 and 100,100 where all the points of the voronoi are inside the square.
-function voronoilib:new(polygoncount,iterations,minx,miny,maxx,maxy)
+function voronoilib:new(polygoncount, iterations, minx, miny, maxx, maxy)
+    local boundary = {minx, miny, minx + maxx, miny + maxy}
+    local points = {}
+    for i=1, polygoncount do
+        local rx,ry = self.tools:randompoint(boundary)
+        while self.tools:tablecontains(points, {'x', 'y'}, {rx, ry}) do
+            rx,ry = self.tools:randompoint(boundary)
+        end
+        points[i] = {x = rx, y = ry}
+    end
+    points = self.tools:sortthepoints(points)
+    return self:fromPoints(points, iterations, boundary)
+end
 
-	local rvoronoi = { }
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+-- creates a voronoi diagram from a table of points and returns a table containing the structure.
+--
+-- points = a table of points in the form {x=int, y=int} that define the voronoi region
+-- iterations = how many times you would like to run the  voronoi. the more iterations, the smoother and more regular
+--              the grid looks, recommend at least 3 iterations for a nice grid. any more is diminishing returns
+-- boundary = a table of the form {minx, miny, maxx, maxy} describing the min and max x and y values from the points table
+function voronoilib:fromPoints(points, iterations, boundary)
+	local rvoronoi = {}
 	----------------------------------------------------------
 	-- the iteration loop
 	for it=1,iterations do
@@ -47,8 +70,7 @@ function voronoilib:new(polygoncount,iterations,minx,miny,maxx,maxy)
 		------------------------------------------------
 		-- initalizes everything needed for this iteration
 		rvoronoi[it] = { }
-		rvoronoi[it].points = { }
-		rvoronoi[it].boundary = { minx,miny,minx+maxx,miny+maxy }
+		rvoronoi[it].boundary = boundary
 		rvoronoi[it].vertex = { }
 		rvoronoi[it].segments = { }
 		rvoronoi[it].events = self.heap:new()
@@ -57,25 +79,17 @@ function voronoilib:new(polygoncount,iterations,minx,miny,maxx,maxy)
 		rvoronoi[it].polygonmap = { }
 		rvoronoi[it].centroids = { }
 
+
+
 		---------------------------------------------------------
-		-- creates the random points that the polygons will be based
-		-- off of. if this is it > 1 then it uses the centroids of the
+		-- if this is it > 1 then it uses the centroids of the
 		-- polygons from the previous iteration as the 'random points'
 		-- this relaxes the voronoi diagram and softens the grids so
 		-- the grid is more even.
-		if it == 1 then
-			-- creates a random point and then checks to see if that point is already inside the set of random points.
-			-- don't know what would happened but it would not return the same amount of polygons that user requested
-			for i=1,polygoncount do
-				local rx,ry = self.tools:randompoint(rvoronoi[it].boundary)
-				while self.tools:tablecontains(rvoronoi[it].points,{ 'x', 'y' }, { rx, ry }) do
-					rx,ry = self.tools:randompoint(rvoronoi[it].boundary)
-				end
-				rvoronoi[it].points[i] = { x = rx, y = ry }
-			end
-			rvoronoi[it].points = self.tools:sortthepoints(rvoronoi[it].points)
-		else
+		if it > 1 then
 			rvoronoi[it].points = rvoronoi[it-1].centroids
+        else
+            rvoronoi[it].points = points
 		end
 
 		-- sets up the rvoronoi events
