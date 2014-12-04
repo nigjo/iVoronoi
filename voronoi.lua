@@ -23,6 +23,13 @@ http://www.cs.hmc.edu/~mbrubeck/voronoi.html
 
 ]]--
 
+-- Monkeypatch a table.pack function if Lua < 5.2
+if not table.pack then
+    function table.pack(...)
+        return { n = select("#", ...), ... }
+    end
+end
+
 -------------------------------------------------------------------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -129,6 +136,7 @@ end
 ------------------------------------------------
 -- returns the actual polygons that are the neighbors
 function voronoilib:getNeighbors(...)
+    local arg = table.pack(...)
 
     local returner = { }
     local indexes = { }
@@ -193,6 +201,7 @@ end
 -- segment --> returns edges where the line segment is shared with atleast 2 polygons
 -- vertex --> returns segments in which the vertexes are shared with atleast 3 polygons
 function voronoilib:getEdges(...)
+    local arg = table.pack(...)
 
     local returner = { }
     local mode = arg[1]
