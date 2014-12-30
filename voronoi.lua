@@ -1054,7 +1054,7 @@ function voronoilib.tools:dirty_poly(invoronoi)
 
 		local mindistance = distances[1].d
 		local i = 1
-		while (distances[i].d - mindistance < voronoilib.constants.zero) do
+		while (distances[i] and distances[i].d - mindistance < voronoilib.constants.zero) do
 
 			if polygon[distances[i].i] == nil then
 
