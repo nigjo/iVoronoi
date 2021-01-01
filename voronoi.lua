@@ -135,18 +135,17 @@ end
 
 ------------------------------------------------
 -- returns the actual polygons that are the neighbors
-function voronoilib:getNeighbors(...)
+function voronoilib:getNeighbors(neighbormode, ...)
     local arg = table.pack(...)
 
     local returner = { }
     local indexes = { }
-
     -- builds a table of it input polygons
-    for i=2,#arg do
-        indexes[arg[i]] = true
+    for i=1,#arg do 
+        indexes[arg[i]] = true 
     end
 
-    if arg[1] == 'all' then
+    if neighbormode == 'all' then
 
         -- finds all the neighbors and removes all duplicates
         local returnIs = { }
@@ -164,7 +163,7 @@ function voronoilib:getNeighbors(...)
             returner[#returner+1] = self.polygons[index]
         end
 
-    elseif arg[1] == 'shared' then
+    elseif neighbormode == 'shared' then
 
         -- finds all the neighbors, counts occurances
         local returnIs = { }
@@ -177,10 +176,10 @@ function voronoilib:getNeighbors(...)
 
         -- builds the polygon table for returning
         for index,count in pairs(returnIs) do
-            if count == (#arg-1) then returner[#returner+1] = self.polygons[index] end
+            if count == #arg then returner[#returner+1] = self.polygons[index] end
         end
 
-    else print('unknown mode in getNeighbors(...): ' .. arg[1]) end
+    else print('unknown mode in getNeighbors(...): ' .. neighbormode) end
 
     --[[for pindex,tt in pairs(indexes) do
         returner[]
